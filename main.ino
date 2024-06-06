@@ -1,4 +1,5 @@
 #define CANT_COLORES 3
+#define MAX_INTENTOS 3
 
 typedef enum {
   VERDE,
@@ -63,6 +64,27 @@ bool verificar_victoria(resultado_t resultado[]) {
   return true;
 }
 
+void mostrar_colores(colores_t colores[]) {
+    putchar('[');
+    for (size_t i = 0; i < CANT_COLORES; i++) {
+        switch(colores[i]) {
+            case AMARILLO:
+                printf("AMARILLO");
+                break;
+            case VERDE:
+                printf("VERDE");
+                break;
+            case ROJO:
+                printf("ROJO");
+                break;
+            default:
+                printf("Error");
+                break;
+        }
+        printf("%s", i != CANT_COLORES - 1 ? ", " : "]");
+    }
+}
+
 void mostrar_resultado(resultado_t resultado[]) {
   for (size_t i = 0; i < CANT_COLORES; i++) {
     Serial.print("Resultado para el color ");
@@ -82,39 +104,54 @@ void mostrar_resultado(resultado_t resultado[]) {
   }
 }
 
+// TODO: Adaptar a Arduino (digitalRead, pasar cosas a loop y setup, etc)
+void comenzar_juego() {
+    // Se elige un patron de colores aleatorio
+    srand(time(NULL));
+    int color1 = rand() % CANT_COLORES;    
+    int color2 = rand() % CANT_COLORES;
+    int color3 = rand() % CANT_COLORES;
 
+    colores_t colores_a_adivinar[CANT_COLORES] = {color1, color2, color3};
+#ifdef DEBUG
+    printf("La respuesta es: ");
+    mostrar_colores(colores_a_adivinar);
+    putchar('\n');
+#endif
 
-void test_derrota() {
-  colores_t respuesta[] = {AMARILLO, ROJO, AMARILLO};
-  colores_t intento[] = {AMARILLO, AMARILLO, VERDE};
-  resultado_t resultado[CANT_COLORES];
-  
-  verificar_aciertos(respuesta, intento, resultado);
+    // Se le pide al usuario que ingrese una combinacion de colores
+    size_t turno = 1;
+    bool victoria = false;
+    while(turno <= MAX_INTENTOS && victoria == false) {
+        printf("Turno %zd\n", turno);
+        colores_t intento[CANT_COLORES];
 
-  mostrar_resultado(resultado);
-  
-  if (verificar_victoria(resultado) == true) {
-  	Serial.println("Ganaste!");
-  } else {
-    Serial.println("Perdiste :(");
-  }
+        // TODO Leer combinacion de colores
+
+        // Se compara esa combinacion con los colores a adivinar 
+        resultado_t resultado[CANT_COLORES];
+        verificar_aciertos(colores_a_adivinar, intento, resultado);
+
+#ifdef DEBUG
+        mostrar_resultado(resultado);
+        putchar('\n');
+        putchar('\n');
+#endif
+        if(verificar_victoria(resultado) == true) 
+            victoria = true;
+
+        turno++;
+    }
+
+    if(victoria == true)
+        printf("Ganaste!\n");
+    else {
+        printf("Perdiste :(\nLa respuesta era: ");
+        mostrar_colores(colores_a_adivinar);
+        putchar('\n');
+    }
 }
 
-void test_victoria() {
-  colores_t respuesta[] = {AMARILLO, ROJO, VERDE};
-  colores_t intento[] = {AMARILLO, ROJO, VERDE};
-  resultado_t resultado[CANT_COLORES];
-  
-  verificar_aciertos(respuesta, intento, resultado);
-
-  mostrar_resultado(resultado);
-  
-  if (verificar_victoria(resultado) == true) {
-  	Serial.println("Ganaste!");
-  } else {
-    Serial.println("Perdiste :(");
-  }
-}
 
 
 
@@ -122,8 +159,6 @@ void setup()
 {
   Serial.begin(9600);
 
-  test_derrota();
-  test_victoria();
 }
 
 void loop()
