@@ -19,13 +19,13 @@ void mostrar_resultado(resultado_t resultado[]);
 
 
 /*
-Compara los colores ingresados con los colores a adivinar y devuelve por parámetro un array con el estado de cada uno.
+Compara los colores ingresados con los colores a adivinar y devuelve por parametro un array con el estado de cada uno.
 'resultado' tiene que tener espacio para CANT_COLORES elementos.
 */
 void verificar_aciertos(colores_t colores_a_adivinar[], colores_t colores_ingresados[], resultado_t *resultado) {
   resultado_t flags[CANT_COLORES] = {INCORRECTO, INCORRECTO, INCORRECTO};
 
-  // Primera recorrida para chequear los colores que están en la posición correcta
+  // Primera recorrida para chequear los colores que estan en la posicion correcta
   for(size_t i = 0; i < CANT_COLORES; i++) {
     if(colores_ingresados[i] == colores_a_adivinar[i]) { 
       resultado[i] = CORRECTO;
@@ -34,29 +34,22 @@ void verificar_aciertos(colores_t colores_a_adivinar[], colores_t colores_ingres
     }
   }
 
-  // Segunda recorrida para chequear los colores que están en una posición incorrecta
-  size_t cont_respuesta = 0;
-  size_t cont_input = 0;
-
-  while(cont_input < CANT_COLORES) {
-    if(resultado[cont_input] == CORRECTO) {
-      cont_input++;
-      continue;
-    }
-    cont_respuesta = 0;
-    while(cont_respuesta < CANT_COLORES) {
-      if(flags[cont_respuesta] == POSICION_INCORRECTA || resultado[cont_input] == POSICION_INCORRECTA || resultado[cont_respuesta] == CORRECTO) {
-        cont_respuesta++;
-        continue;
+  // Segunda recorrida para chequear los colores que estan en una posicion incorrecta
+  for (size_t cont_input = 0; cont_input < CANT_COLORES; cont_input++) {
+    if(resultado[cont_input] != CORRECTO) {  
+      for (size_t cont_respuesta = 0; cont_respuesta < CANT_COLORES; cont_respuesta++) {
+        if (flags[cont_respuesta] != POSICION_INCORRECTA && 
+                resultado[cont_input] != POSICION_INCORRECTA && 
+                resultado[cont_respuesta] != CORRECTO) {
+          
+          if(colores_a_adivinar[cont_respuesta] == colores_ingresados[cont_input]) {
+            flags[cont_respuesta] = POSICION_INCORRECTA;
+            resultado[cont_input] = POSICION_INCORRECTA;
+            break;
+          }
+        }
       }
-      if(colores_a_adivinar[cont_respuesta] == colores_ingresados[cont_input]) {
-        flags[cont_respuesta] = POSICION_INCORRECTA;
-        resultado[cont_input] = POSICION_INCORRECTA;
-        break;
-      }
-      cont_respuesta++;
     }
-    cont_input++;
   }
 }
 
